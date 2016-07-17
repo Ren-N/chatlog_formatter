@@ -28,7 +28,19 @@ div.message-area{
 /* 空欄のエリア */
 div.void-area{
   width: 20%;
+  height: auto;
   min-width: 0px;
+  padding-left: 0;
+  padding-right: 0;
+}
+/* 時刻 */
+div.void-area.left p{
+  text-align: left;
+
+}
+div.void-area.right p{
+  text-align: right;
+
 }
 
 
@@ -112,4 +124,43 @@ display:block;
 top:30px;
 position:absolute;
 width:0;
+}
+
+/* 日付区切り線 */
+/*<hr class="date-line" data-symbol="2016/7/15(金)">*/
+p.date-info {
+  margin: 0;
+  text-align: center;
+}
+hr.date-line {
+  height: 1px;
+  /*background: #bbb;*/
+  border: none;
+  outline: none;
+  margin: 0 15em 1em 15em;
+  position: relative;
+  border-top: 1px solid #bbb;
+	border-bottom: 1px solid #fff;
+	text-align: center;
+}
+/*hr.date-line:before {
+    content: attr(data-symbol);
+    position: absolute;
+    top: 0;
+    left: 50%;
+    background: transparent;
+    color: #393939;
+    padding: 0.5em 3em;
+    @include transform(translate(-50%, -50%));
+  	display: inline-block;
+}*/
+
+/* システムコメント(招待された，入室などの文章) */
+p.sys-comment {
+  text-align: center;
+  margin: 0px auto 10px auto;
+}
+p.sys-comment.time{
+  text-align: center;
+  margin-bottom: 0;
 }
