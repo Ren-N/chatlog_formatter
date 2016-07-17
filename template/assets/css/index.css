@@ -1,7 +1,12 @@
 /*Main画面*/
-#messageArea{
-  padding-top: 100px;
+#ChatArea {
+  /*padding-top: 100px;*/
+  padding: 100px 150px 0 150px;
   width: 100%;
+}
+#logo {
+  height: 1.5em;
+  margin: 0.5em 0 0 0;
 }
 /*メッセージの行*/
 div.row {
@@ -9,36 +14,21 @@ div.row {
   min-height: 100px;
   margin: 0 0 50px 0;
 }
-
-
-/*左側メッセージ*/
-div.icon-left, div.message-left {
-  position: absolute;
-  left: 10;
-}
-/*右側メッセージ*/
-div.icon-right, div.message-right {
-  position: absolute;
-  right: 10;
-}
-
-div.message-right {
-  /*padding-right: 15%*/
-}
-div.message-left {
-  /*padding-left: 15%;*/
-}
-
-
-/*アイコンのエリア*/
-div.icon-left, div.icon-right{
+/* アイコンのエリア */
+div.icon-area{
+  min-width: 100px;
   width: 10%;
   padding: 15px;
 }
-/*メッセージのエリア*/
-div.message-left, div.message-right{
-  width: 90%;
-  padding: 15px 15% 15px 15%; /*メッセージはアイコンの幅だけpaddingする*/
+/* メッセージのエリア */
+div.message-area{
+  width: 70%;
+  padding: 15px;
+}
+/* 空欄のエリア */
+div.void-area{
+  width: 20%;
+  min-width: 0px;
 }
 
 
@@ -46,10 +36,10 @@ div.message-left, div.message-right{
 /*アイコン画像*/
 .icon-wrapper {
   position: relative; /*縦横比を揃えるためのwrapperタグ*/
-  /*width: 100%;*/
   min-width: 50px;
-  max-width: 75px;
+  max-width: 150px;
   padding: 10px;
+  margin:1em auto 0 auto; /* ユーザー名の高さだけ下げるために1em下げる*/
 }
 .icon-wrapper:before {
     content:"";
@@ -68,19 +58,34 @@ div.message-left, div.message-right{
 }
 
 
-/*メッセージテキスト*/
-.message-txt {
-  padding: 5px 15px 5px 15px;
+
+/*メッセージボックス*/
+.message-box {
+  padding: 10px 50px 10px 55px;
   color: #1f1f1f;
 }
-/*メッセージボックス*/
-.message-box1-right {
+.message-text {
+  word-wrap: break-word;
+  margin: 0;
+}
+/* ユーザー名 */
+.user-name {
+  margin: 0;
+}
+.user-name.un-right {
+  text-align: right;
+}
+.user-name.un-left {
+  text-align: left;
+}
+/* メッセージボックス デザイン1 */
+.mbox-style1-right {
   background-color:#a9dbb5;
   border-radius:5px;
   position:relative;
   min-height: 60px;
 }
-.message-box1-right:after {
+.mbox-style1-right:after {
   border:10px solid transparent;
   border-left-color:#a9dbb5;
   border-right-width:0;
@@ -91,13 +96,13 @@ div.message-left, div.message-right{
   position:absolute;
   width:0;
 }
-.message-box1-left {
+.mbox-style1-left {
 background-color:#ccc;
 border-radius:5px;
 position:relative;
 min-height: 60px;
 }
-.message-box1-left:after {
+.mbox-style1-left:after {
 border:10px solid transparent;
 border-right-color:#ccc;
 border-left-width:0;
