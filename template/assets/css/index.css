@@ -1,0 +1,110 @@
+/*Main画面*/
+#messageArea{
+  padding-top: 100px;
+  width: 100%;
+}
+/*メッセージの行*/
+div.row {
+  width: 100%;
+  min-height: 100px;
+  margin: 0 0 50px 0;
+}
+
+
+/*左側メッセージ*/
+div.icon-left, div.message-left {
+  position: absolute;
+  left: 10;
+}
+/*右側メッセージ*/
+div.icon-right, div.message-right {
+  position: absolute;
+  right: 10;
+}
+
+div.message-right {
+  /*padding-right: 15%*/
+}
+div.message-left {
+  /*padding-left: 15%;*/
+}
+
+
+/*アイコンのエリア*/
+div.icon-left, div.icon-right{
+  width: 10%;
+  padding: 15px;
+}
+/*メッセージのエリア*/
+div.message-left, div.message-right{
+  width: 90%;
+  padding: 15px 15% 15px 15%; /*メッセージはアイコンの幅だけpaddingする*/
+}
+
+
+
+/*アイコン画像*/
+.icon-wrapper {
+  position: relative; /*縦横比を揃えるためのwrapperタグ*/
+  /*width: 100%;*/
+  min-width: 50px;
+  max-width: 75px;
+  padding: 10px;
+}
+.icon-wrapper:before {
+    content:"";
+    display: block;
+    padding-top: 100%;
+}
+.icon-wrapper .icon-img{ /*丸画像．タグごとにstyleで画像を指定．*/
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  border-radius: 400px;
+  border:3px solid #fff;
+  box-shadow: 0px 0px 3px #ccc;
+}
+
+
+/*メッセージテキスト*/
+.message-txt {
+  padding: 5px 15px 5px 15px;
+  color: #1f1f1f;
+}
+/*メッセージボックス*/
+.message-box1-right {
+  background-color:#a9dbb5;
+  border-radius:5px;
+  position:relative;
+  min-height: 60px;
+}
+.message-box1-right:after {
+  border:10px solid transparent;
+  border-left-color:#a9dbb5;
+  border-right-width:0;
+  right:-10px;
+  content:"";
+  display:block;
+  top:30px;
+  position:absolute;
+  width:0;
+}
+.message-box1-left {
+background-color:#ccc;
+border-radius:5px;
+position:relative;
+min-height: 60px;
+}
+.message-box1-left:after {
+border:10px solid transparent;
+border-right-color:#ccc;
+border-left-width:0;
+left:-10px;
+content:"";
+display:block;
+top:30px;
+position:absolute;
+width:0;
+}
