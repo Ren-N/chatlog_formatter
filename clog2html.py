@@ -62,26 +62,31 @@ def convertChatLog(filename, app):
         save_date = lines.pop(0)
         lines.pop(0)
 
-        '''本文'''
+        '''チャットログ'''
         # 日付パターン  e.g. 2016/07/15(金)
         date_pttr    = re.compile(r'20[0-9]{2}/[0-9]{2}/[0-9]{2}\([月火水木金土日]\)'.decode('utf-8'))
-        # メッセージ
-        chatlog = [] #次の3種類 > DATE:日付 | SYS:システムコメント | MESSEAGE:人のメッセージ
-        acc = []
+        # chatlogのオブジェクトリスト
+        chatlog = [] #次の3種類 > DATE:日付 | SYS:システムコメント | MESSAGE:人のメッセージ
+        # MESSAGE's accumulator
+        acc = [] # DATEはそのままchatlogに追加．MESSAGE,SYSは貯めてからchatlogに追加．(複数行ある場合の処理のため)
         for line in lines:
             l = line.decode('utf-8')
-            #日付
+            # DATEのパターン
             re_date  = date_pttr.search(l)
             if re_date :
+                # accに貯まっていればchatlogに追加する
                 if len(acc) > 0 :
                     chatlog.extend( _TextToObjectList('MESSAGE',acc) )
-
+                    acc = []
+                # DATEをchatlogに追加する
                 kind = 'DATE'
                 data = re_date.group(0)
                 chatlog.extend( _TextToObjectList(kind,data) )
                 continue
+            # MESSAGE, SYSのパターン
             else:
                 acc.append(l)
+
         # accに残っていればchatlogに追加
         if len(acc) > 0 :
             chatlog.extend( _TextToObjectList('MESSAGE',acc) )
@@ -181,7 +186,8 @@ def printObjList(objectList):
 
 
 # 定型テンプレートを用意しているので，HTML解析器は使わずに文字列置換でWebページを作成
-def insertIntoTemplates(objectList, options):
+def insertIntoTemplates(chatlog, options):
+    objectList = chatlog['chatlog']
     '''テンプレートHTMLの読み込み'''
     TEMPLATE = {}
     for tmpl_name in ['own_message','other_message','syscomment','date','index']:
@@ -228,15 +234,16 @@ def insertIntoTemplates(objectList, options):
     html = tmpl.replace('___HTMLTEXT___', html)
     '''Webページの作成'''
     # ディレクトリの作成
-    if not os.path.isdir(_DIRECTORY_NAME):
-        os.mkdir(_DIRECTORY_NAME)
+    dir_name = chatlog['title']
+    if not os.path.isdir(dir_name):
+        os.mkdir(dir_name)
     # index.htmlの作成
-    f = open(_DIRECTORY_NAME + '/index.html', 'w')
+    f = open(dir_name + '/index.html', 'w')
     f.write(html.encode('utf-8'))
     f.close()
     # 必要なファイル(javascript,css)をコピー
-    if not os.path.isdir(_DIRECTORY_NAME + '/assets'):
-        shutil.copytree(_TEMPLATE_DIRECTORY + '/assets', _DIRECTORY_NAME + '/assets', )
+    if not os.path.isdir(dir_name + '/assets'):
+        shutil.copytree(_TEMPLATE_DIRECTORY + '/assets', dir_name + '/assets', )
 
 
 
@@ -246,6 +253,6 @@ if __name__ == '__main__':
     options = analyzeOptionArgs(sys.argv)
     # chatlogファイルを解析
     chatlog = convertChatLog(options['filename'], options['-app'])
-    # printObjList(chatlog['chatlog'])
+    printObjList(chatlog['chatlog'])
     # Webページ作成
-    insertIntoTemplates(chatlog['chatlog'], options)
+    insertIntoTemplates(chatlog, options)
