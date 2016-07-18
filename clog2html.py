@@ -76,7 +76,7 @@ def convertChatLog(filename, app):
             if re_date :
                 # accに貯まっていればchatlogに追加する
                 if len(acc) > 0 :
-                    chatlog.extend( _TextToObjectList('MESSAGE',acc) )
+                    chatlog.extend( _TextToObjectList('MESSAGE',acc[:-1]) ) #次の日付がある時は空行が入るのでスライスして空行を削除
                     acc = []
                 # DATEをchatlogに追加する
                 kind = 'DATE'
@@ -132,7 +132,6 @@ def _TextToObjectList(kind, data):
         objectList.append( {'DATE':data} )
         return objectList
     '''メッセージ'''
-    # else:
     prev_txt = None
     # print('---------------')
     # print(data)
@@ -143,6 +142,14 @@ def _TextToObjectList(kind, data):
         if re_line :
             # 前のメッセージがあれば蓄積 ----------
             if prev_txt:
+                # 複数行のMESSAGEの場合に文頭・文末からダブルクォーテーションを削除
+                if prev_txt.has_key('MESSAGE') and '<br>' in prev_txt['MESSAGE']['txt']:
+                    a = prev_txt['MESSAGE']['txt'].replace('""','"') # 複数行のとき"があると""にしてエスケープしてあるため"に戻す
+                    a = a.strip() # 前後の空白を削除
+                    a = a[1:] if a[0] == '"' else a # 文頭に"があれば削除
+                    a = a[:-1] if a[-1] == '\n' else a
+                    a = a[:-1] if a[-1] == '"' else a # 文末に"があれば削除
+                    prev_txt['MESSAGE']['txt'] = a
                 objectList.append( prev_txt )
                 prev_txt = None
             # ---------------------------------
@@ -171,6 +178,14 @@ def _TextToObjectList(kind, data):
                 prev_txt['MESSAGE']['txt'] += '\n<br>\n'+line
     # メッセージが残っていれば蓄積
     if prev_txt:
+        # 複数行のMESSAGEの場合に文頭・文末からダブルクォーテーションを削除
+        if prev_txt.has_key('MESSAGE') and '<br>' in prev_txt['MESSAGE']['txt']:
+            a = prev_txt['MESSAGE']['txt'].replace('""','"') # 複数行のとき"があると""にしてエスケープしてあるため"に戻す
+            a = a.strip() # 前後の空白を削除
+            a = a[1:] if a[0] == '"' else a # 文頭に"があれば削除
+            a = a[:-1] if a[-1] == '\n' else a
+            a = a[:-1] if a[-1] == '"' else a # 文末に"があれば削除
+            prev_txt['MESSAGE']['txt'] = a
         objectList.append( prev_txt )
     return objectList
 
@@ -253,6 +268,6 @@ if __name__ == '__main__':
     options = analyzeOptionArgs(sys.argv)
     # chatlogファイルを解析
     chatlog = convertChatLog(options['filename'], options['-app'])
-    printObjList(chatlog['chatlog'])
+    # printObjList(chatlog['chatlog'])
     # Webページ作成
     insertIntoTemplates(chatlog, options)
