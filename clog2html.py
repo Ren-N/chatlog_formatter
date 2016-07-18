@@ -1,13 +1,16 @@
 # -*- coding: utf-8 -*-
 import sys
 import re
+import os
+import shutil
 # $clog2html.py log.txt -name [user-name] -app [application-name]
 
 
 
 # テンプレートHTMLファイルの場所．環境変数を用意して隠しフォルダにtemplateフォルダを置き，
 # 環境変数を参照してアクセスすべきだが，簡易化のため同階層にtemplateフォルダがあるとする．
-_TEMPLATE_DIRECTORY = './template/'
+_TEMPLATE_DIRECTORY = './template'
+_DIRECTORY_NAME     = 'chatlog'
 
 def analyzeOptionArgs(argv):
     u'''コマンド引数をOptionの辞書にして返す．
@@ -113,7 +116,6 @@ def _TextToObjectList(kind, data):
             情報として，{'time':発信時間，'who':誰が，'txt':メッセージテキスト}
             を持つ辞書．
     '''
-    print(kind)
     # 行パターン  e.g. 18:30[Tab]Ren N[Tab]こんにちわ．
     line_pttr    = re.compile(r'([0-9]{2}:[0-9]{2})\t(.*)'.decode('utf-8'))
     # メッセージパターン  e.g. Ren N[Tab]こんにちわ．
@@ -183,7 +185,7 @@ def insertIntoTemplates(objectList, options):
     '''テンプレートHTMLの読み込み'''
     TEMPLATE = {}
     for tmpl_name in ['own_message','other_message','syscomment','date','index']:
-        f = open(_TEMPLATE_DIRECTORY+tmpl_name+'.tmpl')
+        f = open(_TEMPLATE_DIRECTORY+'/'+tmpl_name+'.tmpl')
         TEMPLATE[tmpl_name] = f.read().decode('utf-8')
         f.close()
 
@@ -220,17 +222,21 @@ def insertIntoTemplates(objectList, options):
             num = num + 1
             html.append(tmpl)
     html = '\n'.join(html)
-    print(html)
-    '''index.htmlのテンプレートに挿入'''
 
+    '''index.htmlのテンプレートに挿入'''
+    tmpl = TEMPLATE['index'][:]
+    html = tmpl.replace('___HTMLTEXT___', html)
     '''Webページの作成'''
     # ディレクトリの作成
+    if not os.path.isdir(_DIRECTORY_NAME):
+        os.mkdir(_DIRECTORY_NAME)
     # index.htmlの作成
+    f = open(_DIRECTORY_NAME + '/index.html', 'w')
+    f.write(html.encode('utf-8'))
+    f.close()
     # 必要なファイル(javascript,css)をコピー
-
-
-
-
+    if not os.path.isdir(_DIRECTORY_NAME + '/assets'):
+        shutil.copytree(_TEMPLATE_DIRECTORY + '/assets', _DIRECTORY_NAME + '/assets', )
 
 
 
@@ -241,4 +247,5 @@ if __name__ == '__main__':
     # chatlogファイルを解析
     chatlog = convertChatLog(options['filename'], options['-app'])
     # printObjList(chatlog['chatlog'])
+    # Webページ作成
     insertIntoTemplates(chatlog['chatlog'], options)
