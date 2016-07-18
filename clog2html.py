@@ -4,6 +4,11 @@ import re
 # $clog2html.py log.txt -name [user-name] -app [application-name]
 
 
+
+# テンプレートHTMLファイルの場所．環境変数を用意して隠しフォルダにtemplateフォルダを置き，
+# 環境変数を参照してアクセスすべきだが，簡易化のため同階層にtemplateフォルダがあるとする．
+_TEMPLATE_DIRECTORY = './template/'
+
 def analyzeOptionArgs(argv):
     u'''コマンド引数をOptionの辞書にして返す．
 
@@ -11,13 +16,20 @@ def analyzeOptionArgs(argv):
     $ python clog2html.py log.txt -name 'Ren N' -app LINE
     >>> {'filename':log.txt, '-name':'Ren N', '-app':'LINE'}
     '''
-    _OPTIONS = ['-name','-app']
-    options = {}
+    # オプションの種類
+    _OPTIONS = ['-name','-app','-help']
+    # オプションデフォルト値
+    options = {'filename':None , '-name':'' , '-app':'LINE' , '-help':None}
     if len(argv) == 1:
         #対話式予定
         print('no arguments.')
         sys.exit()
     else:
+        #ヘルプ
+        for arg in enumerate(argv):
+            if arg == '-help':
+                options['-help'] = True
+                return options
         #ファイル名を取得
         if re.match(r'.*?\.txt', argv[1]):
             options['filename'] = argv[1]
@@ -70,7 +82,19 @@ def convertChatLog(filename, app):
         # accに残っていればchatlogに追加
         if len(acc) > 0 :
             chatlog.extend( _TextToObjectList('MESSAGE',acc) )
-    return (title,chatlog)
+        # ユーザーリストの取得
+        users = getUsersList(chatlog)
+    return {'title':title, 'chatlog':chatlog, 'users':users}
+
+
+#発言した人のリストしか得られないが，メッセージ表示に必要なので問題ないと思われる．
+def getUsersList(objectList):
+    userlist = set([]) #重複なしリスト
+    for obj in objectList:
+        if obj.has_key('MESSAGE'):
+            userlist.add( obj['MESSAGE']['who'] )
+    return list(userlist)
+
 
 
 def _TextToObjectList(kind, data):
@@ -154,10 +178,67 @@ def printObjList(objectList):
             print(obj['SYS']['txt'])
 
 
+# 定型テンプレートを用意しているので，HTML解析器は使わずに文字列置換でWebページを作成
+def insertIntoTemplates(objectList, options):
+    '''テンプレートHTMLの読み込み'''
+    TEMPLATE = {}
+    for tmpl_name in ['own_message','other_message','syscomment','date','index']:
+        f = open(_TEMPLATE_DIRECTORY+tmpl_name+'.tmpl')
+        TEMPLATE[tmpl_name] = f.read().decode('utf-8')
+        f.close()
+
+    '''chatlogの行ごとのHTMLの作成'''
+    # object -> HTMLテキスト に変換．(objectの情報をHTMLテンプレートに挿入)
+    html = []
+    num  = 1  #メッセージの番号(1から始まる連番)
+    for obj in objectList:
+        if obj.has_key('DATE') :
+            tmpl = TEMPLATE['date'][:] #deep copy
+            tmpl = tmpl.replace('___DATE___', obj['DATE'])
+            html.append(tmpl)
+        elif obj.has_key('SYS') :
+            tmpl = TEMPLATE['syscomment'][:]
+            tmpl = tmpl.replace('___TIME___', obj['SYS']['time'])
+            tmpl = tmpl.replace('___MESSAGE___', obj['SYS']['txt'])
+            html.append(tmpl)
+        elif obj.has_key('MESSAGE') :
+            mobj = obj['MESSAGE']
+            # ユーザーは右側のメッセージ(吹き出し)．他の人は左側のメッセージ．
+            if mobj['who'] == options['-name']:
+                tmpl = TEMPLATE['own_message'][:]
+            else:
+                tmpl = TEMPLATE['other_message'][:]
+            tmpl = tmpl.replace('___TIME___', mobj['time'])
+            tmpl = tmpl.replace('___NAME___', mobj['who'])
+            tmpl = tmpl.replace('___MESSAGE___', mobj['txt'])
+            tmpl = tmpl.replace('___NUM___', str(num))
+            # tmpl = tmpl.replace('___ICONSRC___', )
+            # ICONSORCはデフォルト画像「usr.png」を参照するようにし，imgフォルダに「ユーザー名.png」を
+            # 置くとその画像に置き換わるようなjavascriptを用意してブラウザ側の処理で変更するようにした方がいいかもしれない．
+            # 必ず画像を用意するとは限らないため．
+            # メッセージの[スタンプ]，[画像]，[動画]についても考える必要がある．
+            num = num + 1
+            html.append(tmpl)
+    html = '\n'.join(html)
+    print(html)
+    '''index.htmlのテンプレートに挿入'''
+
+    '''Webページの作成'''
+    # ディレクトリの作成
+    # index.htmlの作成
+    # 必要なファイル(javascript,css)をコピー
+
+
+
+
+
+
+
+
 if __name__ == '__main__':
     # オプション取得
     options = analyzeOptionArgs(sys.argv)
-    app = options['-app'] if options.has_key('-app') else 'LINE'
     # chatlogファイルを解析
-    chatlog = convertChatLog(options['filename'], app)
-    printObjList(chatlog[1])
+    chatlog = convertChatLog(options['filename'], options['-app'])
+    # printObjList(chatlog['chatlog'])
+    insertIntoTemplates(chatlog['chatlog'], options)
