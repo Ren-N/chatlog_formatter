@@ -93,7 +93,7 @@ def _TextToObjectList(kind, data):
     # 行パターン  e.g. 18:30[Tab]Ren N[Tab]こんにちわ．
     line_pttr    = re.compile(r'([0-9]{2}:[0-9]{2})\t(.*)'.decode('utf-8'))
     # メッセージパターン  e.g. Ren N[Tab]こんにちわ．
-    message_pttr = re.compile(r'(.*?)\t(.*?)'.decode('utf-8')) #これにマッチしない場合(ユーザー名[Tab]がない場合)はシステムコメント．
+    message_pttr = re.compile(r'(.*?)\t(.*)'.decode('utf-8')) #これにマッチしない場合(ユーザー名[Tab]がない場合)はシステムコメント．
     # 戻り値
     objectList = []
     '''日付'''
@@ -143,7 +143,15 @@ def _TextToObjectList(kind, data):
         objectList.append( prev_txt )
     return objectList
 
-
+def printObjList(objectList):
+    for obj in objectList:
+        if obj.has_key('DATE') :
+            print(obj['DATE'])
+        elif obj.has_key('MESSAGE') :
+            data = obj['MESSAGE']
+            print(data['who']+' '+data['txt'])
+        else:
+            print(obj['SYS']['txt'])
 
 
 if __name__ == '__main__':
@@ -152,5 +160,4 @@ if __name__ == '__main__':
     app = options['-app'] if options.has_key('-app') else 'LINE'
     # chatlogファイルを解析
     chatlog = convertChatLog(options['filename'], app)
-    print(chatlog[0])
-    print(chatlog[1][0])
+    printObjList(chatlog[1])
