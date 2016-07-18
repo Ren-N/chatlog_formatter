@@ -163,7 +163,7 @@ def _TextToObjectList(kind, data):
         # メッセージ(複数行の場合．人のメッセージのみ)
         else:
             if prev_txt :
-                prev_txt['MESSAGE']['txt'] += '\n'+line
+                prev_txt['MESSAGE']['txt'] += '\n<br>\n'+line
     # メッセージが残っていれば蓄積
     if prev_txt:
         objectList.append( prev_txt )
